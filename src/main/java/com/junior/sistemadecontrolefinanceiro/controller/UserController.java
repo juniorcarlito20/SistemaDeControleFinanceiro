@@ -1,5 +1,7 @@
 package com.junior.sistemadecontrolefinanceiro.controller;
 
+import com.junior.sistemadecontrolefinanceiro.dto.UserRequestDTO;
+import com.junior.sistemadecontrolefinanceiro.dto.UserResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.User;
 import com.junior.sistemadecontrolefinanceiro.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -17,21 +19,22 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public User createUser(@RequestBody UserRequestDTO userDTO) {
+        return userService.createUser(userDTO);
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         return userService.getAllUsers();
     }
+
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
+    public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id,
-                           @RequestBody User updatedUser) {
+    public UserResponseDTO updateUser(@PathVariable Long id,
+                           @RequestBody UserRequestDTO updatedUser) {
 
         return userService.updateUser(id, updatedUser);
     }
