@@ -4,11 +4,13 @@ import com.junior.sistemadecontrolefinanceiro.dto.AccountRequestDTO;
 import com.junior.sistemadecontrolefinanceiro.dto.AccountResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.Account;
 import com.junior.sistemadecontrolefinanceiro.entity.User;
+import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundException;
 import com.junior.sistemadecontrolefinanceiro.repository.AccountRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class AccountService {
 
@@ -25,7 +27,8 @@ public class AccountService {
     public AccountResponseDTO createAccount(AccountRequestDTO dto) {
 
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuario nao encontrado"));
 
         Account account = new Account();
         account.setName(dto.getName());
@@ -46,7 +49,8 @@ public class AccountService {
     public AccountResponseDTO getAccountById(Long id) {
 
         Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta nao encontrada"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Conta nao encontrada"));
 
         AccountResponseDTO response = new AccountResponseDTO();
         response.setId(account.getId());
@@ -74,7 +78,8 @@ public class AccountService {
     public AccountResponseDTO updateAccount(Long id, AccountRequestDTO dto) {
 
         Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta nao encontrada"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Conta nao encontrada"));
 
         account.setName(dto.getName());
         account.setBalance(dto.getBalance());
@@ -93,7 +98,8 @@ public class AccountService {
     public void deleteAccount(Long id) {
 
         Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta nao encontrada"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Conta nao encontrada"));
 
         accountRepository.delete(account);
     }

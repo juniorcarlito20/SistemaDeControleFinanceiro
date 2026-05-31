@@ -3,6 +3,7 @@ package com.junior.sistemadecontrolefinanceiro.service;
 import com.junior.sistemadecontrolefinanceiro.dto.UserRequestDTO;
 import com.junior.sistemadecontrolefinanceiro.dto.UserResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.User;
+import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundException;
 import com.junior.sistemadecontrolefinanceiro.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,8 @@ public class UserService {
     public UserResponseDTO getUserById(Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Usuario nao encontrado"));
 
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
