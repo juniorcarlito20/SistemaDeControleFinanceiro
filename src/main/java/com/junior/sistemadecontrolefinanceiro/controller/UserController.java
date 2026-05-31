@@ -19,7 +19,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody UserRequestDTO userDTO) {
+    public UserResponseDTO createUser(@RequestBody UserRequestDTO userDTO) {
         return userService.createUser(userDTO);
     }
 
@@ -32,15 +32,17 @@ public class UserController {
     public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
+
     @PutMapping("/{id}")
-    public UserResponseDTO updateUser(@PathVariable Long id,
-                           @RequestBody UserRequestDTO updatedUser) {
+    public UserResponseDTO updateUser(
+            @PathVariable Long id,
+            @RequestBody UserRequestDTO updatedUser) {
 
         return userService.updateUser(id, updatedUser);
     }
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
-
 }

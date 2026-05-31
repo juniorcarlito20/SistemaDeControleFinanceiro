@@ -17,7 +17,7 @@ public class UserService {
     }
 
     //Metodo para criar os usuarios
-    public User createUser(UserRequestDTO dto) {
+    public UserResponseDTO createUser(UserRequestDTO dto) {
 
         User user = new User();
 
@@ -25,7 +25,14 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        UserResponseDTO response = new UserResponseDTO();
+        response.setId(savedUser.getId());
+        response.setName(savedUser.getName());
+        response.setEmail(savedUser.getEmail());
+
+        return response;
     }
 
     // metodo para listar todos os usuarios
