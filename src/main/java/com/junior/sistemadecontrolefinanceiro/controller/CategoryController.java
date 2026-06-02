@@ -18,7 +18,6 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // Criar categoria
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponseDTO createCategory(
@@ -27,13 +26,12 @@ public class CategoryController {
         return categoryService.createCategory(dto);
     }
 
-    // Listar todas as categorias
     @GetMapping
     public List<CategoryResponseDTO> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    // Buscar categoria por ID
+
     @GetMapping("/{id}")
     public CategoryResponseDTO getCategoryById(
             @PathVariable Long id) {
@@ -41,7 +39,7 @@ public class CategoryController {
         return categoryService.getCategoryById(id);
     }
 
-    // Atualizar categoria
+
     @PutMapping("/{id}")
     public CategoryResponseDTO updateCategory(
             @PathVariable Long id,
@@ -50,7 +48,7 @@ public class CategoryController {
         return categoryService.updateCategory(id, dto);
     }
 
-    // Deletar categoria
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(

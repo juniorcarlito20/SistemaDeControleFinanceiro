@@ -8,7 +8,6 @@ import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundExcepti
 import com.junior.sistemadecontrolefinanceiro.repository.AccountRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
