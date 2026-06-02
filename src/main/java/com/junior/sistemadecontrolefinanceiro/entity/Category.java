@@ -3,7 +3,7 @@ package com.junior.sistemadecontrolefinanceiro.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "tb_categories")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
