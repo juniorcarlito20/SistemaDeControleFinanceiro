@@ -4,6 +4,8 @@ import com.junior.sistemadecontrolefinanceiro.dto.UserRequestDTO;
 import com.junior.sistemadecontrolefinanceiro.dto.UserResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.User;
 import com.junior.sistemadecontrolefinanceiro.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +21,10 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO userDTO) {
-        return userService.createUser(userDTO);
+    public ResponseEntity<UserResponseDTO> createUser(
+            @Valid @RequestBody UserRequestDTO dto) {
+
+        return ResponseEntity.ok(userService.createUser(dto));
     }
 
     @GetMapping

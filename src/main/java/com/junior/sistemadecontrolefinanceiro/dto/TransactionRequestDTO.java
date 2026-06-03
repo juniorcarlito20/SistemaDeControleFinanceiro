@@ -1,10 +1,14 @@
 package com.junior.sistemadecontrolefinanceiro.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 
 public class TransactionRequestDTO {
 
+
     private String description;
+    @NotNull(message = "Valor é obrigatório")
     private BigDecimal amount;
     private Long accountId;
     private Long categoryId;
