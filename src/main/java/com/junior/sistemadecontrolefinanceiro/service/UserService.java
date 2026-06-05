@@ -15,92 +15,81 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
-
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    //Metodo para criar os usuarios
+    // Método para criar os usuários
     public UserResponseDTO createUser(UserRequestDTO dto) {
 
+        // VALIDAÇÃO: Verifica se o e-mail já está cadastrado usando findByEmail
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Este e-mail já está em uso por outro usuário.");
+        }
+
         User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); // Criptografia da senha
+        user.setRole("ROLE_USER");
+
+        User savedUser = userRepository.save(user);
+        return convertToResponseDTO(savedUser);
+    }
+
+    // Método para listar todos os usuários
+    public List<UserResponseDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(this::convertToResponseDTO) // Reaproveita o método de conversão (incluindo o ID)
+                .toList();
+    }
+
+    // Método para buscar usuário por Id
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
+        return convertToResponseDTO(user);
+    }
+
+    // Método para atualizar usuário
+    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
+
+        // VALIDAÇÃO: Verifica se o novo e-mail já pertence a OUTRO usuário
+        userRepository.findByEmail(dto.getEmail()).ifPresent(existingUser -> {
+            if (!existingUser.getId().equals(id)) {
+                throw new IllegalArgumentException("Este e-mail já está em uso por outro usuário.");
+            }
+        });
 
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(
-                passwordEncoder.encode(
-                        dto.getPassword()));
-        user.setRole("ROLE_USER");
-        User savedUser = userRepository.save(user);
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); // Criptografia corrigida na atualização
 
-        UserResponseDTO response = new UserResponseDTO();
-        response.setId(savedUser.getId());
-        response.setName(savedUser.getName());
-        response.setEmail(savedUser.getEmail());
-
-        return response;
+        User updated = userRepository.save(user);
+        return convertToResponseDTO(updated);
     }
 
-    // metodo para listar todos os usuarios
-    public List<UserResponseDTO> getAllUsers() {
-
-        List<User> users = userRepository.findAll();
-
-        return users.stream().map(user -> {
-            UserResponseDTO dto = new UserResponseDTO();
-            dto.setName(user.getName());
-            dto.setEmail(user.getEmail());
-            return dto;
-        }).toList();
-    }
-
-    //Metodo para buscar usuario por Id
-    public UserResponseDTO getUserById(Long id) {
-
+    // Método para deletar usuário
+    public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
 
+        userRepository.delete(user);
+    }
+
+    /**
+     * Método auxiliar para converter a Entidade para DTO.
+     * Evita repetição de código e garante consistência de dados nos retornos.
+     */
+    private UserResponseDTO convertToResponseDTO(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
-
         return dto;
-
-
     }
-
-     //Metodo para atualizar usuario
-     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
-
-         User user = userRepository.findById(id)
-                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-         user.setName(dto.getName());
-         user.setEmail(dto.getEmail());
-         user.setPassword(dto.getPassword());
-
-         User updated = userRepository.save(user);
-
-         UserResponseDTO response = new UserResponseDTO();
-         response.setId(updated.getId());
-         response.setName(updated.getName());
-         response.setEmail(updated.getEmail());
-
-         return response;
-     }
-
-     //Metodo para deletar usuario
-     public void deleteUser(Long id) {
-
-         User user = userRepository.findById(id)
-                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-         userRepository.delete(user);
-     }
-
 }

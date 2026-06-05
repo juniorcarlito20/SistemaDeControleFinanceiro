@@ -9,6 +9,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(nullable = false, unique = true) // Garante que o banco de dados rejeite duplicados
     private String email;
     private String password;
     private String role;
