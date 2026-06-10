@@ -6,13 +6,16 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tb_accounts")
-
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
-    private BigDecimal   balance;
+
+    @Column(nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -21,12 +24,15 @@ public class Account {
     public Account() {
     }
 
-    public Long getId() {
-        return id;
+    public Account(Long id, String name, BigDecimal balance, User user) {
+        this.id = id;
+        this.name = name;
+        this.balance = balance;
+        this.user = user;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -51,5 +57,9 @@ public class Account {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

@@ -3,7 +3,7 @@ package com.junior.sistemadecontrolefinanceiro.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "tb_users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

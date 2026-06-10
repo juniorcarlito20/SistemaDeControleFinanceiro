@@ -1,5 +1,6 @@
 package com.junior.sistemadecontrolefinanceiro.entity;
 
+import com.junior.sistemadecontrolefinanceiro.enums.TransactionType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -12,28 +13,40 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType type;
+
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     public Transaction() {
     }
 
-    public Transaction(Long id, String description, BigDecimal amount) {
+    public Transaction(Long id,
+                       String description,
+                       BigDecimal amount,
+                       TransactionType type,
+                       Account account,
+                       Category category) {
         this.id = id;
         this.description = description;
         this.amount = amount;
+        this.type = type;
+        this.account = account;
+        this.category = category;
     }
-
-    // GETTERS E SETTERS
 
     public Long getId() {
         return id;
@@ -57,6 +70,14 @@ public class Transaction {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public Account getAccount() {

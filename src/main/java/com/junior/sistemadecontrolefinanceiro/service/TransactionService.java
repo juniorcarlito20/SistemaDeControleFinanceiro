@@ -5,6 +5,7 @@ import com.junior.sistemadecontrolefinanceiro.dto.TransactionResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.Account;
 import com.junior.sistemadecontrolefinanceiro.entity.Category;
 import com.junior.sistemadecontrolefinanceiro.entity.Transaction;
+import com.junior.sistemadecontrolefinanceiro.enums.TransactionType;
 import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundException;
 import com.junior.sistemadecontrolefinanceiro.repository.AccountRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.CategoryRepository;
@@ -16,11 +17,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
+
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository, CategoryRepository categoryRepository) {
+    public TransactionService(
+            TransactionRepository transactionRepository,
+            AccountRepository accountRepository,
+            CategoryRepository categoryRepository) {
+
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.categoryRepository = categoryRepository;
@@ -39,8 +45,28 @@ public class TransactionService {
         Transaction transaction = new Transaction();
         transaction.setDescription(dto.getDescription());
         transaction.setAmount(dto.getAmount());
+        transaction.setType(dto.getType());
         transaction.setAccount(account);
         transaction.setCategory(category);
+
+        if (dto.getType() == TransactionType.INCOME) {
+
+            account.setBalance(
+                    account.getBalance().add(dto.getAmount())
+            );
+
+        } else {
+
+            if (account.getBalance().compareTo(dto.getAmount()) < 0) {
+                throw new RuntimeException("Saldo insuficiente");
+            }
+
+            account.setBalance(
+                    account.getBalance().subtract(dto.getAmount())
+            );
+        }
+
+        accountRepository.save(account);
 
         Transaction saved = transactionRepository.save(transaction);
 
@@ -48,19 +74,21 @@ public class TransactionService {
                 saved.getId(),
                 saved.getDescription(),
                 saved.getAmount(),
+                saved.getType(),
                 saved.getAccount().getId(),
                 saved.getCategory().getId()
         );
     }
 
-
     public List<TransactionResponseDTO> getAllTransactions() {
+
         return transactionRepository.findAll()
                 .stream()
                 .map(t -> new TransactionResponseDTO(
                         t.getId(),
                         t.getDescription(),
                         t.getAmount(),
+                        t.getType(),
                         t.getAccount().getId(),
                         t.getCategory().getId()
                 ))
@@ -77,11 +105,11 @@ public class TransactionService {
                 transaction.getId(),
                 transaction.getDescription(),
                 transaction.getAmount(),
+                transaction.getType(),
                 transaction.getAccount().getId(),
                 transaction.getCategory().getId()
         );
     }
-
 
     public TransactionResponseDTO updateTransaction(Long id, TransactionRequestDTO dto) {
 
@@ -99,6 +127,7 @@ public class TransactionService {
 
         transaction.setDescription(dto.getDescription());
         transaction.setAmount(dto.getAmount());
+        transaction.setType(dto.getType());
         transaction.setAccount(account);
         transaction.setCategory(category);
 
@@ -108,6 +137,7 @@ public class TransactionService {
                 updated.getId(),
                 updated.getDescription(),
                 updated.getAmount(),
+                updated.getType(),
                 updated.getAccount().getId(),
                 updated.getCategory().getId()
         );
@@ -121,5 +151,4 @@ public class TransactionService {
 
         transactionRepository.delete(transaction);
     }
-
 }
