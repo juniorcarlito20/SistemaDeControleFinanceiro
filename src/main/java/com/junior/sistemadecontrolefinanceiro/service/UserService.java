@@ -20,7 +20,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Método para criar os usuários
+    // Metodo para criar usuario
     public UserResponseDTO createUser(UserRequestDTO dto) {
 
         // VALIDAÇÃO: Verifica se o e-mail já está cadastrado usando findByEmail
@@ -38,22 +38,22 @@ public class UserService {
         return convertToResponseDTO(savedUser);
     }
 
-    // Método para listar todos os usuários
+    // Metodo para listar todos os usuarios
     public List<UserResponseDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(this::convertToResponseDTO) // Reaproveita o método de conversão (incluindo o ID)
+                .map(this::convertToResponseDTO) // Reaproveita o metodo de conversão (incluindo o ID)
                 .toList();
     }
 
-    // Método para buscar usuário por Id
+    // Metodo para buscar usuario por ID
     public UserResponseDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
         return convertToResponseDTO(user);
     }
 
-    // Método para atualizar usuário
+    // Metodo para atualizar usuario
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
@@ -73,18 +73,14 @@ public class UserService {
         return convertToResponseDTO(updated);
     }
 
-    // Método para deletar usuário
+    // Metodo para deletar usuario
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com o ID: " + id));
 
         userRepository.delete(user);
     }
-
-    /**
-     * Método auxiliar para converter a Entidade para DTO.
-     * Evita repetição de código e garante consistência de dados nos retornos.
-     */
+    // Metodo auxiliar para converter entidade em DTO
     private UserResponseDTO convertToResponseDTO(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());

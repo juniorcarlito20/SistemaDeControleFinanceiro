@@ -6,6 +6,7 @@ import com.junior.sistemadecontrolefinanceiro.entity.Account;
 import com.junior.sistemadecontrolefinanceiro.entity.Category;
 import com.junior.sistemadecontrolefinanceiro.entity.Transaction;
 import com.junior.sistemadecontrolefinanceiro.enums.TransactionType;
+import com.junior.sistemadecontrolefinanceiro.exceptions.InsufficientBalanceException;
 import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundException;
 import com.junior.sistemadecontrolefinanceiro.repository.AccountRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.CategoryRepository;
@@ -32,6 +33,7 @@ public class TransactionService {
         this.categoryRepository = categoryRepository;
     }
 
+    // Metodo para criar transacao e atualizar saldo da conta
     public TransactionResponseDTO createTransaction(TransactionRequestDTO dto) {
 
         Account account = accountRepository.findById(dto.getAccountId())
@@ -58,7 +60,7 @@ public class TransactionService {
         } else {
 
             if (account.getBalance().compareTo(dto.getAmount()) < 0) {
-                throw new RuntimeException("Saldo insuficiente");
+                throw new InsufficientBalanceException("Saldo insuficiente");
             }
 
             account.setBalance(
@@ -80,6 +82,7 @@ public class TransactionService {
         );
     }
 
+    // Metodo para listar todas as transacoes
     public List<TransactionResponseDTO> getAllTransactions() {
 
         return transactionRepository.findAll()
@@ -95,6 +98,7 @@ public class TransactionService {
                 .collect(Collectors.toList());
     }
 
+    // Metodo para buscar transacao por id
     public TransactionResponseDTO getTransactionById(Long id) {
 
         Transaction transaction = transactionRepository.findById(id)
@@ -111,6 +115,7 @@ public class TransactionService {
         );
     }
 
+    // Metodo para atualizar transacao
     public TransactionResponseDTO updateTransaction(Long id, TransactionRequestDTO dto) {
 
         Transaction transaction = transactionRepository.findById(id)
@@ -143,6 +148,7 @@ public class TransactionService {
         );
     }
 
+    // Metodo para deletar transacao
     public void deleteTransaction(Long id) {
 
         Transaction transaction = transactionRepository.findById(id)

@@ -21,6 +21,15 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<String> handleInsufficientBalance(
+            InsufficientBalanceException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(
             MethodArgumentNotValidException ex) {

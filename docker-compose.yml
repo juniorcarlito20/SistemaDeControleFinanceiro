@@ -4,18 +4,25 @@ services:
     image: mysql:8.0
     container_name: mysql-controle-financeiro
     restart: always
+
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: controle_financeiro
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppass
+
     ports:
       - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
     healthcheck:
       test: [ "CMD-SHELL", "mysqladmin ping -h localhost -proot" ]
       interval: 10s
       timeout: 5s
       retries: 10
+
   app:
     build: .
     container_name: app-controle-financeiro
@@ -23,11 +30,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+
     ports:
       - "8080:8080"
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/controle_financeiro
       SPRING_DATASOURCE_USERNAME: appuser
       SPRING_DATASOURCE_PASSWORD: apppass
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+volumes:
+  mysql_data:
