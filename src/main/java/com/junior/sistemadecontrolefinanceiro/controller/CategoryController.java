@@ -2,10 +2,11 @@ package com.junior.sistemadecontrolefinanceiro.controller;
 
 import com.junior.sistemadecontrolefinanceiro.dto.CategoryRequestDTO;
 import com.junior.sistemadecontrolefinanceiro.dto.CategoryResponseDTO;
+import com.junior.sistemadecontrolefinanceiro.entity.User;
 import com.junior.sistemadecontrolefinanceiro.service.CategoryService;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -19,41 +20,38 @@ public class CategoryController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponseDTO createCategory(
-            @RequestBody CategoryRequestDTO dto) {
+    public ResponseEntity<CategoryResponseDTO> create(
+            @RequestBody CategoryRequestDTO dto,
+            @AuthenticationPrincipal User userLogado) {
+        return ResponseEntity.ok(categoryService.createCategory(dto, userLogado.getId()));
+    }
 
-        return categoryService.createCategory(dto);
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponseDTO> getById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User userLogado) {
+        return ResponseEntity.ok(categoryService.getCategoryById(id, userLogado.getId()));
     }
 
     @GetMapping
-    public List<CategoryResponseDTO> getAllCategories() {
-        return categoryService.getAllCategories();
+    public ResponseEntity<List<CategoryResponseDTO>> getAll(
+            @AuthenticationPrincipal User userLogado) {
+        return ResponseEntity.ok(categoryService.getAllCategories(userLogado.getId()));
     }
-
-
-    @GetMapping("/{id}")
-    public CategoryResponseDTO getCategoryById(
-            @PathVariable Long id) {
-
-        return categoryService.getCategoryById(id);
-    }
-
 
     @PutMapping("/{id}")
-    public CategoryResponseDTO updateCategory(
+    public ResponseEntity<CategoryResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody CategoryRequestDTO dto) {
-
-        return categoryService.updateCategory(id, dto);
+            @RequestBody CategoryRequestDTO dto,
+            @AuthenticationPrincipal User userLogado) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, dto, userLogado.getId()));
     }
 
-
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(
-            @PathVariable Long id) {
-
-        categoryService.deleteCategory(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User userLogado) {
+        categoryService.deleteCategory(id, userLogado.getId());
+        return ResponseEntity.noContent().build();
     }
 }

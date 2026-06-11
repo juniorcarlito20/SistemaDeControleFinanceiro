@@ -12,6 +12,7 @@ import com.junior.sistemadecontrolefinanceiro.repository.AccountRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.CategoryRepository;
 import com.junior.sistemadecontrolefinanceiro.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,22 +28,24 @@ public class TransactionService {
             TransactionRepository transactionRepository,
             AccountRepository accountRepository,
             CategoryRepository categoryRepository) {
-
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.categoryRepository = categoryRepository;
     }
 
-    // Metodo para criar transacao e atualizar saldo da conta
-    public TransactionResponseDTO createTransaction(TransactionRequestDTO dto) {
+    // Metodo para criar transação e atualizar saldo da conta
+    @Transactional
+    public TransactionResponseDTO createTransaction(TransactionRequestDTO dto, Long userId) {
 
-        Account account = accountRepository.findById(dto.getAccountId())
+        // SEGURANÇA: Só permite usar a conta se ela pertencer de fato ao usuário logado
+        Account account = accountRepository.findByIdAndUserId(dto.getAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Conta não encontrada com id: " + dto.getAccountId()));
+                        "Conta não encontrada ou acesso negado para o id: " + dto.getAccountId()));
 
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        //  SEGURANÇA ATUALIZADA: Garante que a categoria usada também pertence ao usuário logado
+        Category category = categoryRepository.findByIdAndUserId(dto.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Categoria não encontrada com id: " + dto.getCategoryId()));
+                        "Categoria não encontrada ou acesso negado com id: " + dto.getCategoryId()));
 
         Transaction transaction = new Transaction();
         transaction.setDescription(dto.getDescription());
@@ -52,83 +55,53 @@ public class TransactionService {
         transaction.setCategory(category);
 
         if (dto.getType() == TransactionType.INCOME) {
-
-            account.setBalance(
-                    account.getBalance().add(dto.getAmount())
-            );
-
+            account.setBalance(account.getBalance().add(dto.getAmount()));
         } else {
-
             if (account.getBalance().compareTo(dto.getAmount()) < 0) {
                 throw new InsufficientBalanceException("Saldo insuficiente");
             }
-
-            account.setBalance(
-                    account.getBalance().subtract(dto.getAmount())
-            );
+            account.setBalance(account.getBalance().subtract(dto.getAmount()));
         }
 
         accountRepository.save(account);
-
         Transaction saved = transactionRepository.save(transaction);
 
-        return new TransactionResponseDTO(
-                saved.getId(),
-                saved.getDescription(),
-                saved.getAmount(),
-                saved.getType(),
-                saved.getAccount().getId(),
-                saved.getCategory().getId()
-        );
+        return convertToDTO(saved);
     }
 
-    // Metodo para listar todas as transacoes
-    public List<TransactionResponseDTO> getAllTransactions() {
-
-        return transactionRepository.findAll()
+    // Metodo para listar todas as transações DO USUÁRIO LOGADO
+    public List<TransactionResponseDTO> getAllTransactions(Long userId) {
+        return transactionRepository.findByAccountUserId(userId)
                 .stream()
-                .map(t -> new TransactionResponseDTO(
-                        t.getId(),
-                        t.getDescription(),
-                        t.getAmount(),
-                        t.getType(),
-                        t.getAccount().getId(),
-                        t.getCategory().getId()
-                ))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Metodo para buscar transacao por id
-    public TransactionResponseDTO getTransactionById(Long id) {
-
-        Transaction transaction = transactionRepository.findById(id)
+    // Metodo para buscar transação por id
+    public TransactionResponseDTO getTransactionById(Long id, Long userId) {
+        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Transação não encontrada com id: " + id));
+                        "Transação não encontrada ou acesso negado com id: " + id));
 
-        return new TransactionResponseDTO(
-                transaction.getId(),
-                transaction.getDescription(),
-                transaction.getAmount(),
-                transaction.getType(),
-                transaction.getAccount().getId(),
-                transaction.getCategory().getId()
-        );
+        return convertToDTO(transaction);
     }
 
-    // Metodo para atualizar transacao
-    public TransactionResponseDTO updateTransaction(Long id, TransactionRequestDTO dto) {
+    // Metodo para atualizar transação
+    @Transactional
+    public TransactionResponseDTO updateTransaction(Long id, TransactionRequestDTO dto, Long userId) {
 
-        Transaction transaction = transactionRepository.findById(id)
+        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Transação não encontrada com id: " + id));
+                        "Transação não encontrada ou acesso negado com id: " + id));
 
-        Account account = accountRepository.findById(dto.getAccountId())
+        Account account = accountRepository.findByIdAndUserId(dto.getAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Conta não encontrada com id: " + dto.getAccountId()));
+                        "Conta não encontrada ou acesso negado para o id: " + dto.getAccountId()));
 
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        //  SEGURANÇA ATUALIZADA: Garante que a nova categoria opcional também pertence ao usuário logado
+        Category category = categoryRepository.findByIdAndUserId(dto.getCategoryId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Categoria não encontrada com id: " + dto.getCategoryId()));
+                        "Categoria não encontrada ou acesso negado com id: " + dto.getCategoryId()));
 
         transaction.setDescription(dto.getDescription());
         transaction.setAmount(dto.getAmount());
@@ -137,24 +110,26 @@ public class TransactionService {
         transaction.setCategory(category);
 
         Transaction updated = transactionRepository.save(transaction);
-
-        return new TransactionResponseDTO(
-                updated.getId(),
-                updated.getDescription(),
-                updated.getAmount(),
-                updated.getType(),
-                updated.getAccount().getId(),
-                updated.getCategory().getId()
-        );
+        return convertToDTO(updated);
     }
 
-    // Metodo para deletar transacao
-    public void deleteTransaction(Long id) {
-
-        Transaction transaction = transactionRepository.findById(id)
+    // Metodo para deletar transação
+    public void deleteTransaction(Long id, Long userId) {
+        Transaction transaction = transactionRepository.findByIdAndAccountUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Transação não encontrada com id: " + id));
+                        "Transação não encontrada ou acesso negado com id: " + id));
 
         transactionRepository.delete(transaction);
+    }
+
+    private TransactionResponseDTO convertToDTO(Transaction t) {
+        return new TransactionResponseDTO(
+                t.getId(),
+                t.getDescription(),
+                t.getAmount(),
+                t.getType(),
+                t.getAccount().getId(),
+                t.getCategory().getId()
+        );
     }
 }

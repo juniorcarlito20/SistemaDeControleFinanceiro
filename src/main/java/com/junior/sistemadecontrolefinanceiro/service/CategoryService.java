@@ -3,89 +3,98 @@ package com.junior.sistemadecontrolefinanceiro.service;
 import com.junior.sistemadecontrolefinanceiro.dto.CategoryRequestDTO;
 import com.junior.sistemadecontrolefinanceiro.dto.CategoryResponseDTO;
 import com.junior.sistemadecontrolefinanceiro.entity.Category;
+import com.junior.sistemadecontrolefinanceiro.entity.User;
 import com.junior.sistemadecontrolefinanceiro.exceptions.ResourceNotFoundException;
 import com.junior.sistemadecontrolefinanceiro.repository.CategoryRepository;
+import com.junior.sistemadecontrolefinanceiro.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository,
+                           UserRepository userRepository) {
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
-    // Criar categoria
-    public CategoryResponseDTO createCategory(CategoryRequestDTO dto) {
+
+    // METODO: CRIAR CATEGORIA
+
+    public CategoryResponseDTO createCategory(CategoryRequestDTO dto, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         Category category = new Category();
         category.setName(dto.getName());
+        category.setUser(user);
 
-        Category savedCategory = categoryRepository.save(category);
-
-        return new CategoryResponseDTO(
-                savedCategory.getId(),
-                savedCategory.getName()
-        );
+        Category saved = categoryRepository.save(category);
+        return convertToDTO(saved);
     }
 
-    // Listar todas as categorias
-    public List<CategoryResponseDTO> getAllCategories() {
 
-        return categoryRepository.findAll()
-                .stream()
-                .map(category -> new CategoryResponseDTO(
-                        category.getId(),
-                        category.getName()
-                ))
-                .collect(Collectors.toList());
+    // METODO: BUSCAR CATEGORIA POR ID
+
+    public CategoryResponseDTO getCategoryById(Long id, Long userId) {
+
+        Category category = categoryRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Categoria não encontrada ou acesso negado"));
+
+        return convertToDTO(category);
     }
 
-    // Buscar categoria por ID
-    public CategoryResponseDTO getCategoryById(Long id) {
 
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Categoria não encontrada com id: " + id));
+    // METODO: LISTAR CATEGORIAS DO USUARIO LOGADO
 
-        return new CategoryResponseDTO(
-                category.getId(),
-                category.getName()
-        );
+    public List<CategoryResponseDTO> getAllCategories(Long userId) {
+
+        List<Category> categories = categoryRepository.findByUserId(userId);
+
+        return categories.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
-    // Atualizar categoria
-    public CategoryResponseDTO updateCategory(Long id,
-                                              CategoryRequestDTO dto) {
 
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Categoria não encontrada com id: " + id));
+    // METODO: ATUALIZAR CATEGORIA
+
+    public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO dto, Long userId) {
+
+        Category category = categoryRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Categoria não encontrada ou acesso negado"));
 
         category.setName(dto.getName());
 
-        Category updatedCategory = categoryRepository.save(category);
-
-        return new CategoryResponseDTO(
-                updatedCategory.getId(),
-                updatedCategory.getName()
-        );
+        Category updated = categoryRepository.save(category);
+        return convertToDTO(updated);
     }
 
-    // Deletar categoria
-    public void deleteCategory(Long id) {
 
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Categoria não encontrada com id: " + id));
+    // METODO: DELETAR CATEGORIA
+
+    public void deleteCategory(Long id, Long userId) {
+
+        Category category = categoryRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Categoria não encontrada ou acesso negado"));
 
         categoryRepository.delete(category);
     }
+
+    // METODO AUXILIAR: CONVERTER PARA DTO
+
+    private CategoryResponseDTO convertToDTO(Category category) {
+        // Passamos os dois argumentos esperados (id e name) direto no construtor
+        return new CategoryResponseDTO(category.getId(), category.getName());
+    }
+
 }

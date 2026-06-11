@@ -1,10 +1,27 @@
+# --- JAVA / MAVEN ---
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# --- SEGURANÇA E AMBIENTE (CRÍTICO) ---
+.env
+*.local
+
+# --- SISTEMA OPERACIONAL ---
+.DS_Store
+Thumbs.db
+
+# --- DOCKER (Temporários) ---
+.docker/
+docker-compose.override.yml
+
+# --- LOGS ---
+*.log
+logs/
+
+# --- STS / ECLIPSE ---
 .apt_generated
 .classpath
 .factorypath
@@ -13,13 +30,14 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# --- INTELLIJ IDEA ---
+.idea/
 *.iws
 *.iml
 *.ipr
+out/
 
-### NetBeans ###
+# --- NETBEANS ---
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -28,8 +46,3 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-target/
-.env
-.idea/
-*.iml
