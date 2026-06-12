@@ -45,9 +45,9 @@ public class AdminInitializer implements CommandLineRunner {
 
             userRepository.save(admin);
 
-            System.out.println("🚀 [SISTEMA] Usuário inicial com perfil ADMIN criado com segurança via Variável de Ambiente!");
+            System.out.println(" [SISTEMA] Usuário inicial com perfil ADMIN criado com segurança via Variável de Ambiente!");
         } else {
-            System.out.println("ℹ️ [SISTEMA] Administrador já existente. Ignorando criação.");
+            System.out.println("[SISTEMA] Administrador já existente. Ignorando criação.");
         }
     }
 }
