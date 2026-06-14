@@ -36,7 +36,9 @@ public class JwtFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
 
         // 💡 CORREÇÃO: Ignora a validação de Token para rotas de autenticação e documentação
-        if (requestURI.contains("/auth/") || requestURI.contains("/swagger-ui") || requestURI.contains("/v3/api-docs")) {
+        if (requestURI.startsWith("/auth")
+                || requestURI.startsWith("/swagger-ui")
+                || requestURI.startsWith("/v3/api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }

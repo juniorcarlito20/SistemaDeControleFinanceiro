@@ -43,7 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/auth/**"
+                                "/swagger-ui.html"
                         ).permitAll()
 
                         // Apenas o cadastro de usuários (POST) é público. GET/PUT/DELETE ficam protegidos.
