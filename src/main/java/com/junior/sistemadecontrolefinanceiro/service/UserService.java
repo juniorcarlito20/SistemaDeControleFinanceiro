@@ -88,4 +88,8 @@ public class UserService {
         dto.setEmail(user.getEmail());
         return dto;
     }
+
+    public UserResponseDTO findByEmail(String name) {
+            return null;
+    }
 }
