@@ -1,285 +1,104 @@
 # Sistema de Controle Financeiro
 
-API REST desenvolvida com Java e Spring Boot para gerenciamento financeiro pessoal, permitindo cadastro de usuários, autenticação segura com JWT e gerenciamento de contas financeiras.
+API REST para controle financeiro pessoal, feita com **Java 21** e **Spring Boot**. Permite cadastrar usuários, contas, categorias e transações, com autenticação **JWT** e documentação interativa em **Swagger**.
 
----
+## Tecnologias
 
-## Tecnologias Utilizadas
-
-- Java 21
-- Spring Boot
-- Spring Data JPA
-- Spring Security
-- JWT (JSON Web Token)
-- MySQL
-- Maven
-- Swagger / OpenAPI
-- Git
-- GitHub
-
----
+Java 21 · Spring Boot · Spring Data JPA · Spring Security · JWT · MySQL 8 · Maven · Swagger/OpenAPI · Docker e Docker Compose
 
 ## Funcionalidades
 
-### Usuários
-- Cadastro de usuários
-- Consulta de usuários
-- Atualização de usuários
-- Exclusão de usuários
+- **Usuários:** cadastro, consulta, atualização, exclusão e consulta do próprio perfil (`/users/me`).
+- **Contas:** CRUD de contas financeiras.
+- **Categorias:** CRUD de categorias para organizar as transações.
+- **Transações:** CRUD de receitas e despesas.
+- **Segurança:** login com JWT, senhas criptografadas com BCrypt, endpoints públicos e protegidos, usuário administrador criado na inicialização.
+- **Qualidade de API:** DTOs de entrada e saída, validação de dados e tratamento global de exceções.
 
-### Contas
-- Cadastro de contas
-- Consulta de contas
-- Atualização de contas
-- Exclusão de contas
+## Arquitetura
 
-### Segurança
-- Autenticação com JWT
-- Senhas criptografadas com BCrypt
-- Endpoints públicos e protegidos
-- Controle de acesso por token
-
----
-
-## Arquitetura do Projeto
-
-O projeto segue uma arquitetura em camadas:
+Arquitetura em camadas, com separação de responsabilidades:
 
 ```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Banco de Dados
+Controller  →  Service  →  Repository  →  MySQL
 ```
-
-Também foram aplicadas boas práticas como:
-
-- DTOs para entrada e saída de dados
-- Tratamento global de exceções
-- Separação de responsabilidades
-- Spring Security para autenticação
-- JWT para autorização
-
----
-
-## Estrutura do Projeto
 
 ```text
 src/main/java
-├── config
+├── config        (OpenAPI, inicialização do administrador)
 ├── controller
 ├── dto
 ├── entity
-├── exceptions
+├── exceptions    (tratamento global de erros)
 ├── repository
-├── security
+├── security      (JWT e Spring Security)
 └── service
 ```
 
----
+## Como rodar
 
-## Endpoints Principais
+Pré-requisito: Docker.
 
-### Endpoints Públicos
+```bash
+# defina a senha do usuário administrador (admin@sistema.com)
+export ADMIN_PASSWORD=sua_senha_aqui      # Windows (PowerShell): $env:ADMIN_PASSWORD="sua_senha_aqui"
 
-#### Cadastro de Usuário
-
-```http
-POST /users
+docker compose up --build
 ```
 
-#### Login
+A API sobe em `http://localhost:8080` e o MySQL na porta `3307`.
+Documentação interativa: `http://localhost:8080/swagger-ui/index.html`
 
-```http
-POST /auth/login
-```
+> A senha do MySQL no `docker-compose.yml` serve apenas para desenvolvimento local.
 
-### Endpoints Protegidos
+## Endpoints
 
-#### Usuários
+| Recurso | Rotas | Acesso |
+|---|---|---|
+| Cadastro | `POST /users` | público |
+| Login | `POST /auth/login` | público |
+| Usuários | `GET /users`, `GET /users/{id}`, `GET /users/me`, `PUT /users/{id}`, `DELETE /users/{id}` | token |
+| Contas | `POST/GET /accounts`, `GET/PUT/DELETE /accounts/{id}` | token |
+| Categorias | `POST/GET /categories`, `GET/PUT/DELETE /categories/{id}` | token |
+| Transações | `POST/GET /transactions`, `GET/PUT/DELETE /transactions/{id}` | token |
 
-```http
-GET /users
-GET /users/{id}
-PUT /users/{id}
-DELETE /users/{id}
-```
-
-#### Contas
-
-```http
-POST /accounts
-GET /accounts
-GET /accounts/{id}
-PUT /accounts/{id}
-DELETE /accounts/{id}
-```
-
----
-
-## Exemplo de Cadastro
-
-### Request
+### Exemplo: cadastro e login
 
 ```json
-{
-  "name": "João Silva",
-  "email": "joao@email.com",
-  "password": "123456"
-}
+// POST /users
+{ "name": "João Silva", "email": "joao@email.com", "password": "123456" }
+
+// POST /auth/login  ->  { "token": "SEU_TOKEN_JWT" }
+{ "email": "joao@email.com", "password": "123456" }
 ```
 
-### Response
-
-```json
-{
-  "id": 1,
-  "name": "João Silva",
-  "email": "joao@email.com"
-}
-```
-
----
-
-## Exemplo de Login
-
-### Request
-
-```json
-{
-  "email": "joao@email.com",
-  "password": "123456"
-}
-```
-
-### Response
-
-```json
-{
-  "token": "SEU_TOKEN_JWT"
-}
-```
-
----
-
-## Autenticação
-
-Para acessar os endpoints protegidos, envie o token JWT no Header da requisição:
+Nos endpoints protegidos, envie o token no cabeçalho:
 
 ```http
 Authorization: Bearer SEU_TOKEN_JWT
 ```
 
----
+## Capturas de tela
 
-## Tratamento de Exceções
+| Cadastro | Login e token |
+|---|---|
+| ![Cadastro](images/cadastro.png) | ![Login](images/login.png) |
 
-O sistema possui tratamento global de exceções utilizando:
+| Sem token (acesso negado) | Com token (acesso permitido) |
+|---|---|
+| ![Sem token](images/sem-token.png) | ![Com token](images/com-token.png) |
 
+| Swagger | Banco MySQL |
+|---|---|
+| ![Swagger](images/swagger.png) | ![Banco](images/mysql.png) |
 
-Exemplos:
+## Próximos passos
 
-- Usuário não encontrado
-- Conta não encontrada
-- Requisições inválidas
-- Erros de autenticação
-
----
-
-# Screenshots
-
-## Cadastro de Usuário
-
-> Inserir print aqui
-
-![Cadastro](images/cadastro.png)
-
----
-
-## Login e Geração de Token
-
-> Inserir print aqui
-
-![Login](images/login.png)
-
----
-
-## Acesso Negado Sem Token
-
-> Inserir print aqui
-
-![Sem Token](images/sem-token.png)
-
----
-
-## Acesso Permitido Com Token
-
-> Inserir print aqui
-
-![Com Token](images/com-token.png)
-
----
-
-## Swagger / OpenAPI
-
-> Inserir print aqui
-
-![Swagger](images/swagger.png)
-
----
-
-## Banco de Dados MySQL
-
-> Inserir print aqui
-
-![Banco](images/mysql.png)
-
----
-
-## Próximas Melhorias
-
-- Docker
-- Frontend Web
-- Deploy em Nuvem
-- Categorias Financeiras
-- Transações Financeiras
-- Dashboard Financeiro
-
----
+- Frontend web
+- Dashboard financeiro (totais por categoria e por período)
+- Deploy em nuvem
 
 ## Autor
 
-**Junior Rodrigues**
-
-Desenvolvedor Back-end com foco em:
-
-- Java
-- Spring Boot
-- APIs REST
-- Spring Security
-- JWT
-- MySQL
-
----
-
-## Status do Projeto
-
-🚧 Em desenvolvimento
-
-Etapas concluídas:
-
-- CRUD de Usuários
-- CRUD de Contas
-- DTOs
-- Tratamento Global de Exceções
-- Spring Security
-- JWT Authentication
-- Swagger
-- Testes dos Endpoints
-
-Próxima etapa:
-
-- Dockerização da aplicação
+**Junior Rodrigues** — estudante de Análise e Desenvolvimento de Sistemas (Uninter), com foco em Java e Spring Boot.
+[GitHub](https://github.com/juniorcarlito20) · [LinkedIn](https://linkedin.com/in/junior-rodrigues-b63b4640b)
