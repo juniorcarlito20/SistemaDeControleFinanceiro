@@ -40,16 +40,14 @@ src/main/java
 Pré-requisito: Docker.
 
 ```bash
-# defina a senha do usuário administrador (admin@sistema.com)
-export ADMIN_PASSWORD=sua_senha_aqui      # Windows (PowerShell): $env:ADMIN_PASSWORD="sua_senha_aqui"
-
+cp .env.example .env        # depois edite o .env e troque as senhas
 docker compose up --build
 ```
 
+O `.env` define a senha do MySQL (`MYSQL_ROOT_PASSWORD`) e a do usuário administrador (`ADMIN_PASSWORD`, login `admin@sistema.com`). Ele não é versionado.
+
 A API sobe em `http://localhost:8080` e o MySQL na porta `3307`.
 Documentação interativa: `http://localhost:8080/swagger-ui/index.html`
-
-> A senha do MySQL no `docker-compose.yml` serve apenas para desenvolvimento local.
 
 ## Endpoints
 
